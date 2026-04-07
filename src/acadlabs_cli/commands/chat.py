@@ -108,6 +108,7 @@ PENTING: Kamu sudah tahu konteks project ini. Jangan tanya user tentang struktur
         console.print(f"[yellow]Ada file yang dimodifikasi. AI akan mempertimbangkan perubahan ini.[/yellow]")
     
     chat_title = None  # Akan diisi dari pesan pertama
+    chat_saved = False  # Track apakah chat sudah disimpan ke DB
     total_tools_executed = 0  # Track total tools
     session_prompt_tokens = 0  # Track session tokens
     session_completion_tokens = 0
@@ -142,7 +143,9 @@ PENTING: Kamu sudah tahu konteks project ini. Jangan tanya user tentang struktur
             # Set judul chat dari pesan pertama
             if chat_title is None:
                 chat_title = prompt[:50] + ("..." if len(prompt) > 50 else "")
-                save_chat_to_db(chat_id, user_id, chat_title, now)
+                chat_saved = save_chat_to_db(chat_id, user_id, chat_title, now, message=prompt)
+                if not chat_saved:
+                    console.print("[yellow]Warning: Gagal menyimpan chat ke database[/yellow]")
 
             # ============================================
             # TOKEN CHECK - Warning jika context terlalu panjang
@@ -184,9 +187,10 @@ PENTING: Kamu sudah tahu konteks project ini. Jangan tanya user tentang struktur
             chat_history.append({"role": "user", "content": prompt})
             chat_history.append({"role": "assistant", "content": final_response or "(task completed)"})
             
-            # Simpan ke database
-            save_message_to_db(str(uuid.uuid4()), "user", prompt, chat_id, user_id, now)
-            save_message_to_db(str(uuid.uuid4()), "assistant", final_response or "(completed)", chat_id, user_id, now)
+            # Simpan ke database (hanya jika chat sudah tersimpan)
+            if chat_saved:
+                save_message_to_db(str(uuid.uuid4()), "user", prompt, chat_id, user_id, now)
+                save_message_to_db(str(uuid.uuid4()), "assistant", final_response or "(completed)", chat_id, user_id, now)
 
         except KeyboardInterrupt:
             console.print("\n[yellow]Interrupted. Ketik 'exit' untuk keluar.[/yellow]")

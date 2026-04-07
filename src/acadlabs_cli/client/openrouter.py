@@ -1,20 +1,28 @@
 """OpenRouter API client with Function Calling support"""
-import os
 import json
 from typing import List, Dict, Any, Optional, Tuple
 from openai import OpenAI
-from dotenv import load_dotenv
-
-load_dotenv()
 
 class OpenRouterClient:
     def __init__(self):
-        self.client = OpenAI(
-            base_url="https://openrouter.ai/api/v1",
-            api_key=os.getenv("OPENROUTER_API_KEY"),
+        self.default_model = "nvidia/nemotron-3-super-120b-a12b:free"  # Model default
+
+    @property
+    def client(self):
+        # Import supabase client di dalam sini untuk menghindari circular import
+        from acadlabs_cli.client.supabase import supabase_client
+        
+        # Ambil Karcis Masuk (JWT Token) dari user yang udah login di CLI
+        token = supabase_client.access_token
+        
+        if not token:
+            token = "belum-login" # Biar gak error kalau ngetest, tapi nanti akan ditolak server
+            
+        # Bikin client OpenAI tapi diarahkan ke Supabase Edge Function
+        return OpenAI(
+            base_url="https://zmavvvayuyiceccgjaux.supabase.co/functions/v1/hyper-responder", 
+            api_key=token, # Kita masukin JWT Token kesini, BUKAN masukin API Key OpenRouter!
         )
-        self.api_key = os.getenv("OPENROUTER_API_KEY")
-        self.default_model = "astepfun/step-3.5-flash:free"  # Model default
 
 # Singleton instance
 openrouter_client = OpenRouterClient()
