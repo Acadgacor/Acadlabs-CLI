@@ -1,12 +1,8 @@
 #!/bin/bash
 # ╔═══════════════════════════════════════════════════════════════════════════╗
 # ║                                                                           ║
-# ║   ╔═╗╔═╗╦  ╔═╗╔═╗╔╦╗╔═╗╦═╗  ╦ ╦╔═╗╔╗╔╔╦╗╔═╗╦═╗╔╦╗  ╔═╗╦╔╗╔╔╦╗╦ ╦╔═╗╦  ╔═╗  ║
-# ║   ╠╣ ║ ║║  ║╣ ╚═╗ ║ ║ ║╠╦╝  ╠═╣║ ║║║║ ║║║╣ ╠╦╝ ║║  ╠═╣║║║║ ║ ║ ║╠═╝║  ╠╣   ║
-# ║   ╚  ╚═╝╩═╝╚═╝╚═╝ ╩ ╚═╝╩╚═  ╩ ╩╚═╝╝╚╝═╩╝╚═╝╩╚══╩╝  ╩ ╩╩╝╚╝ ╩ ╚═╝╩  ╩  ╚═╝  ║
-# ║                                                                           ║
-# ║              🎓 AcadLabs CLI Installer v1.0.0                             ║
-# ║              Command Line Interface untuk Platform AcadLabs               ║
+# ║   🎓 AcadLabs CLI Installer v1.0.1                                        ║
+# ║   Command Line Interface untuk Platform AcadLabs                          ║
 # ║                                                                           ║
 # ║   GitHub: https://github.com/Acadgacor/acadlabs-cli                       ║
 # ║   Docs:   https://acadlabs.fun/docs                                       ║
@@ -28,7 +24,7 @@ readonly WHITE='\033[1;37m'
 readonly GRAY='\033[0;90m'
 readonly BOLD='\033[1m'
 readonly DIM='\033[2m'
-readonly NC='\033[0m' # No Color
+readonly NC='\033[0m'
 
 # ═══════════════════════════════════════════════════════════════════════════
 # ⚙️ CONFIGURATION
@@ -36,26 +32,25 @@ readonly NC='\033[0m' # No Color
 readonly REPO_URL="https://github.com/Acadgacor/acadlabs-cli.git"
 readonly DOCS_URL="https://acadlabs.fun/docs"
 readonly WEB_UI="https://acadlabs.fun"
-readonly INSTALLER_VERSION="1.0.0"
+readonly INSTALLER_VERSION="1.0.1"
 
 # Default values
-INSTALL_METHOD="auto"  # auto | pipx | pip
+INSTALL_METHOD="auto"
 NO_PROMPT=false
 VERBOSE=false
 DRY_RUN=false
 
 # ═══════════════════════════════════════════════════════════════════════════
-# 🔧 UTILITY FUNCTIONS
+# 🔧 UTILITY FUNCTIONS (LOGGING KE STDERR)
 # ═══════════════════════════════════════════════════════════════════════════
 
-log_info()    { echo -e "${GREEN}[INFO]${NC}  $1"; }
-log_warn()    { echo -e "${YELLOW}[WARN]${NC}  $1"; }
-log_error()   { echo -e "${RED}[ERROR]${NC} $1"; }
-log_step()    { echo -e "${BLUE}[STEP]${NC}  ${BOLD}$1${NC}"; }
-log_success() { echo -e "${GREEN}[✓]${NC}    $1"; }
-log_spinner() { echo -e "${CYAN}[...]${NC}   $1"; }
+# ✅ SEMUA LOG FUNCTION MENGGUNAKAN >&2 AGAR TIDAK MENGGANGGU STDOUT CAPTURE
+log_info()    { echo -e "${GREEN}[INFO]${NC}  $1" >&2; }
+log_warn()    { echo -e "${YELLOW}[WARN]${NC}  $1" >&2; }
+log_error()   { echo -e "${RED}[ERROR]${NC} $1" >&2; }
+log_step()    { echo -e "${BLUE}[STEP]${NC}  ${BOLD}$1${NC}" >&2; }
+log_success() { echo -e "${GREEN}[✓]${NC}    $1" >&2; }
 
-# Print the main banner
 print_banner() {
     clear
     echo -e "${CYAN}"
@@ -72,37 +67,19 @@ print_banner() {
     echo -e "${NC}"
 }
 
-# Print section header with divider
 print_section() {
     local title="$1"
-    echo ""
-    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo -e "${WHITE}${BOLD}  $title${NC}"
-    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo ""
+    echo "" >&2
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}" >&2
+    echo -e "${WHITE}${BOLD}  $title${NC}" >&2
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}" >&2
+    echo "" >&2
 }
 
-# Simple spinner for async operations
-show_spinner() {
-    local pid=$1
-    local msg=$2
-    local spin='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
-    local i=0
-    
-    while kill -0 $pid 2>/dev/null; do
-        printf "\r${CYAN}${spin:$i:1}${NC}  $msg"
-        i=$(( (i + 1) % 10 ))
-        sleep 0.1
-    done
-    printf "\r${GREEN}✓${NC}  $msg\n"
-}
-
-# Check if command exists
 check_command() {
     command -v "$1" &>/dev/null
 }
 
-# Confirm with user (with default)
 confirm() {
     local message="$1"
     local default="${2:-y}"
@@ -195,10 +172,10 @@ check_python() {
     
     if ! check_command python3; then
         log_error "python3 not found!"
-        echo ""
-        echo -e "  ${WHITE}Please install Python 3.8+ from:${NC}"
-        echo -e "  ${CYAN}  https://www.python.org/downloads/${NC}"
-        echo ""
+        echo "" >&2
+        echo -e "  ${WHITE}Please install Python 3.8+ from:${NC}" >&2
+        echo -e "  ${CYAN}  https://www.python.org/downloads/${NC}" >&2
+        echo "" >&2
         return 1
     fi
     
@@ -214,7 +191,6 @@ check_python() {
     
     log_success "Python $version detected ✓"
     
-    # Check pip
     if ! python3 -m pip --version &>/dev/null; then
         log_warn "pip not found, attempting to bootstrap..."
         curl -sS https://bootstrap.pypa.io/get-pip.py | python3 - || {
@@ -225,23 +201,25 @@ check_python() {
     else
         log_success "pip is available ✓"
     fi
-    echo ""
+    echo "" >&2
     return 0
 }
 
+# ✅ FIXED: Hanya method name yang ke stdout, log ke stderr
 detect_install_method() {
     local method="$INSTALL_METHOD"
     
     if [[ "$method" == "auto" ]]; then
         if check_command pipx; then
-            log_info "pipx detected - using isolated environment (recommended)" >&2
+            log_info "pipx detected - using isolated environment (recommended)"
             method="pipx"
         else
-            log_info "pipx not found - falling back to pip" >&2
+            log_info "pipx not found - falling back to pip"
             method="pip"
         fi
     fi
     
+    # ✅ Hanya return method name ke stdout (untuk variable capture)
     echo "$method"
 }
 
@@ -255,7 +233,7 @@ install_with_pipx() {
     log_step "Installing AcadLabs CLI with pipx..."
     
     if $DRY_RUN; then
-        echo "  [DRY RUN] pipx install git+${REPO_URL} --force"
+        echo "  [DRY RUN] pipx install git+${REPO_URL} --force" >&2
         return 0
     fi
     
@@ -278,7 +256,7 @@ install_with_pip() {
     log_warn "Using --break-system-packages (system Python)"
     
     if $DRY_RUN; then
-        echo "  [DRY RUN] python3 -m pip install git+${REPO_URL} --break-system-packages --force-reinstall"
+        echo "  [DRY RUN] python3 -m pip install git+${REPO_URL} --break-system-packages --force-reinstall" >&2
         return 0
     fi
     
@@ -301,30 +279,28 @@ install_with_pip() {
 verify_installation() {
     print_section "✅ Verifying Installation"
     
-    # Refresh shell hash table
     hash -r 2>/dev/null || true
     
     if check_command acadlabs; then
         local version
         version=$(acadlabs --version 2>/dev/null || echo "unknown")
         log_success "Command 'acadlabs' is ready! (v${version})"
-        echo ""
+        echo "" >&2
         return 0
     fi
     
     log_warn "'acadlabs' command not found in PATH"
-    echo ""
+    echo "" >&2
     
-    # Check common locations
     local locations=("$HOME/.local/bin" "/usr/local/bin" "$HOME/.local/pipx/bin")
     for loc in "${locations[@]}"; do
         if [[ -x "$loc/acadlabs" ]]; then
             log_info "Found acadlabs at: $loc/acadlabs"
-            echo ""
-            echo -e "  ${YELLOW}Add to your PATH:${NC}"
-            echo -e "  ${CYAN}  export PATH=\"\$PATH:$loc\"${NC}"
-            echo -e "  ${DIM}  Add to ~/.bashrc or ~/.zshrc for permanent access${NC}"
-            echo ""
+            echo "" >&2
+            echo -e "  ${YELLOW}Add to your PATH:${NC}" >&2
+            echo -e "  ${CYAN}  export PATH=\"\$PATH:$loc\"${NC}" >&2
+            echo -e "  ${DIM}  Add to ~/.bashrc or ~/.zshrc for permanent access${NC}" >&2
+            echo "" >&2
             return 0
         fi
     done
@@ -342,7 +318,7 @@ print_success() {
     echo -e "${GREEN}"
     echo "  ╔════════════════════════════════════════════════════════════╗"
     echo "  ║                                                            ║"
-    echo "  ║   ${BOLD}🎉 Installation Complete! 🎉${NC}${GREEN}                        ║"
+    echo "  ║   ${BOLD}🎉 Installation Complete! 🎉${NC}${GREEN}        ║"
     echo "  ║                                                            ║"
     echo "  ╚════════════════════════════════════════════════════════════╝"
     echo -e "${NC}"
@@ -371,39 +347,36 @@ main() {
     
     print_banner
     
-    # Show install plan if dry-run
     if $DRY_RUN; then
-        echo -e "${YELLOW}[DRY RUN MODE]${NC} - No changes will be made"
-        echo ""
+        echo -e "${YELLOW}[DRY RUN MODE]${NC} - No changes will be made" >&2
+        echo "" >&2
     fi
     
-    # Pre-installation checks
     if ! check_python; then
         exit 1
     fi
     
-    # Show install method
+    # ✅ FIXED: Capture hanya method name, log tampil terpisah di stderr
     local method
     method=$(detect_install_method)
-    echo -e "${BLUE}[METHOD]${NC}  Using: ${BOLD}${method}${NC}"
-    echo ""
+    
+    echo -e "${BLUE}[METHOD]${NC}  Using: ${BOLD}${method}${NC}" >&2
+    echo "" >&2
     
     if ! $NO_PROMPT; then
         if ! confirm "Proceed with installation?"; then
-            echo -e "\n${YELLOW}Installation cancelled.${NC}"
+            echo -e "\n${YELLOW}Installation cancelled.${NC}" >&2
             exit 0
         fi
-        echo ""
+        echo "" >&2
     fi
     
-    # Execute installation
     case "$method" in
         pipx)  install_with_pipx || exit 1 ;;
         pip)   install_with_pip  || exit 1 ;;
         *)     log_error "Unknown method: $method"; exit 1 ;;
     esac
     
-    # Verify and show success
     verify_installation
     print_success
 }
@@ -412,7 +385,6 @@ main() {
 # 🏁 ENTRY POINT
 # ═══════════════════════════════════════════════════════════════════════════
 
-# Handle errors gracefully
-trap 'echo -e "\n${RED}Installation interrupted.${NC}\n"; exit 130' INT TERM
+trap 'echo -e "\n${RED}Installation interrupted.${NC}\n" >&2; exit 130' INT TERM
 
 main "$@"
