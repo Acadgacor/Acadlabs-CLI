@@ -234,10 +234,10 @@ detect_install_method() {
     
     if [[ "$method" == "auto" ]]; then
         if check_command pipx; then
-            log_info "pipx detected - using isolated environment (recommended)"
+            log_info "pipx detected - using isolated environment (recommended)" >&2
             method="pipx"
         else
-            log_info "pipx not found - falling back to pip"
+            log_info "pipx not found - falling back to pip" >&2
             method="pip"
         fi
     fi
