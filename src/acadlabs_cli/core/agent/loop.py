@@ -20,7 +20,7 @@ from rich.table import Table
 from acadlabs_cli.core.agent.config import LoopStatus, LoopState, AgenticConfig
 
 # Import token manager
-from acadlabs_cli.utils.token_manager import (
+from acadlabs_cli.core.token import (
     TokenManager,
     estimate_tokens,
     estimate_history_tokens,

@@ -8,7 +8,7 @@ import os
 # Add parent directory to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from acadlabs_cli.utils.tools import (
+from acadlabs_cli.tools import (
     get_tools_schema,
     execute_tool,
     get_tool_by_name,

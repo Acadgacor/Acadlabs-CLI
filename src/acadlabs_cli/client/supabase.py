@@ -187,10 +187,16 @@ def save_chat_to_db(chat_id: str, user_id: str, title: str, created_at: str, mes
             "user_id": user_id,
             "title": title,
             "created_at": created_at,
-            "message": message or ""  # Selalu isi, jangan None
+            "message": message or "",  # Selalu isi, jangan None
+            "role": "user"  # Chat initiator role
         }
         result = supabase.table("chats").insert(data).execute()
-        return True
+        # Check if insert actually succeeded
+        if hasattr(result, 'data') and result.data:
+            return True
+        else:
+            print(f"Error saving chat: Insert returned no data")
+            return False
     except Exception as e:
         print(f"Error saving chat: {e}")
         return False
@@ -198,7 +204,7 @@ def save_chat_to_db(chat_id: str, user_id: str, title: str, created_at: str, mes
 def save_message_to_db(message_id: str, role: str, content: str, chat_id: str, user_id: str, created_at: str) -> bool:
     """Simpan message ke database. Returns True jika sukses."""
     try:
-        supabase.table("messages").insert({
+        result = supabase.table("messages").insert({
             "id": message_id,
             "role": role,
             "content": content,
@@ -206,7 +212,12 @@ def save_message_to_db(message_id: str, role: str, content: str, chat_id: str, u
             "user_id": user_id,
             "created_at": created_at
         }).execute()
-        return True
+        # Check if insert actually succeeded
+        if hasattr(result, 'data') and result.data:
+            return True
+        else:
+            print(f"Error saving message: Insert returned no data")
+            return False
     except Exception as e:
         print(f"Error saving message: {e}")
         return False

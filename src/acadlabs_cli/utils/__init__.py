@@ -59,8 +59,8 @@ from acadlabs_cli.utils.security import (
     require_confirmation,
 )
 
-# Import from token_manager module
-from acadlabs_cli.utils.token_manager import (
+# Import from core.token module
+from acadlabs_cli.core.token import (
     TokenManager,
     TokenUsage,
     create_token_manager,

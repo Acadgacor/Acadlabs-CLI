@@ -8,14 +8,14 @@ import os
 # Add parent directory to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from acadlabs_cli.utils.agentic_loop import (
+from acadlabs_cli.core.agent import (
     AgenticLoop,
     AgenticConfig,
     LoopState,
     LoopStatus,
     create_agentic_loop,
 )
-from acadlabs_cli.utils.tools import (
+from acadlabs_cli.tools import (
     get_tools_schema,
     execute_tool,
     is_dangerous_tool,
