@@ -168,7 +168,7 @@ def send_tool_results(
         })
     
     # Import tools schema
-    from acadlabs_cli.utils.tools import get_tools_schema
+    from acadlabs_cli.tools import get_tools_schema
     tools_schema = get_tools_schema()
     
     try:

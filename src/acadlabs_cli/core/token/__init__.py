@@ -1,11 +1,5 @@
-"""
-Token & Cost Management System - Backward Compatibility Module
+"""Token module - Token estimation and management"""
 
-DEPRECATED: Import dari acadlabs_cli.core.token sebagai gantinya.
-Module ini hanya untuk backward compatibility.
-"""
-
-# Re-export semua dari lokasi baru
 from acadlabs_cli.core.token.estimator import (
     CHARS_PER_TOKEN,
     MODEL_CONTEXT_LIMITS,

@@ -1,11 +1,5 @@
-"""
-Agentic Loop - Backward Compatibility Module
+"""Agent module - Agentic Loop implementation"""
 
-DEPRECATED: Import dari acadlabs_cli.core.agent sebagai gantinya.
-Module ini hanya untuk backward compatibility.
-"""
-
-# Re-export semua dari lokasi baru
 from acadlabs_cli.core.agent.config import (
     LoopStatus,
     LoopState,
@@ -26,6 +20,3 @@ __all__ = [
     "create_agentic_loop",
     "agentic_loop",
 ]
-
-# Backward compatibility - export classes yang sebelumnya ada di file ini
-# (untuk menghindari breaking changes pada import lama)
