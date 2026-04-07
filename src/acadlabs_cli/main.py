@@ -3,12 +3,16 @@ import typer
 import uuid
 from datetime import datetime, timezone
 from rich.console import Console
-from rich.prompt import Prompt
+from rich.prompt import Prompt, Confirm
+from rich.panel import Panel
 from acadlabs_cli.client.supabase import login_user, login_with_google, save_chat_to_db, save_message_to_db, supabase
 from acadlabs_cli.client.openrouter import ask_ai
+from acadlabs_cli.utils.actions import ActionConfirmator, ActionDetector
 
 app = typer.Typer(name="acadlabs", help="AI-powered coding assistant CLI", add_completion=True)
 console = Console()
+action_confirmator = ActionConfirmator()
+action_detector = ActionDetector()
 
 @app.command(name="login-google")
 def login_google():
@@ -74,8 +78,33 @@ def chat():
             with console.status("[bold green] Sedang berpikir...[/bold green]"):
                 ai_response = ask_ai(prompt, chat_history)
 
-            # Tampilkan jawaban
-            console.print(f"\n[bold yellow]Acadlabs:[/bold yellow] {ai_response}")
+            # Cek apakah ada aksi berbahaya dan minta konfirmasi
+            detected_actions = action_detector.detect(ai_response)
+            
+            if detected_actions:
+                # Tampilkan response dengan peringatan
+                console.print(f"\n[bold yellow]Acadlabs:[/bold yellow] {ai_response}")
+                
+                # Minta konfirmasi untuk setiap jenis aksi
+                approved_types = set()
+                all_approved = True
+                
+                for action_type, pattern, matched in detected_actions:
+                    if action_type in approved_types:
+                        continue
+                    
+                    if not action_confirmator.confirm_action(action_type, matched, ai_response):
+                        all_approved = False
+                        console.print("[yellow]Aksi diblokir. AI akan memberikan alternatif.[/yellow]")
+                        break
+                    
+                    approved_types.add(action_type)
+                
+                if all_approved:
+                    console.print("[green]Aksi disetujui. Kamu bisa menjalankannya secara manual.[/green]")
+            else:
+                # Tampilkan jawaban normal
+                console.print(f"\n[bold yellow]Acadlabs:[/bold yellow] {ai_response}")
 
             # Update history context
             chat_history.append({"role": "user", "content": prompt})
