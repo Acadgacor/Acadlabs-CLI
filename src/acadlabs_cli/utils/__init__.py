@@ -1,10 +1,18 @@
-"""Utils module - 5 Layer Security System"""
+"""Utils module - 5 Layer Security System (Refactored)"""
 
-from acadlabs_cli.utils.actions import (
+# Import from action_detection module
+from acadlabs_cli.utils.action_detection import (
     # Detectors
     ActionDetector,
     ActionConfirmator,
-    
+    action_confirmator,
+    create_action_confirmator,
+    DANGEROUS_PATTERNS,
+    ACTION_DESCRIPTIONS,
+)
+
+# Import from security module (all layers)
+from acadlabs_cli.utils.security import (
     # Layer 5: Containerization
     DockerExecutor,
     ContainerizationError,
@@ -51,10 +59,31 @@ from acadlabs_cli.utils.actions import (
     require_confirmation,
 )
 
+# Import from token_manager module
+from acadlabs_cli.utils.token_manager import (
+    TokenManager,
+    TokenUsage,
+    create_token_manager,
+    estimate_tokens,
+    estimate_message_tokens,
+    estimate_history_tokens,
+    estimate_api_tokens,
+    check_and_prompt_clear,
+    token_manager,
+    MODEL_CONTEXT_LIMITS,
+    WARNING_THRESHOLD,
+    CRITICAL_THRESHOLD,
+    DANGER_THRESHOLD,
+)
+
 __all__ = [
     # Detectors
     "ActionDetector",
     "ActionConfirmator",
+    "action_confirmator",
+    "create_action_confirmator",
+    "DANGEROUS_PATTERNS",
+    "ACTION_DESCRIPTIONS",
     
     # Layer 5: Containerization
     "DockerExecutor",
@@ -100,4 +129,19 @@ __all__ = [
     
     # Decorator
     "require_confirmation",
+    
+    # Token Manager
+    "TokenManager",
+    "TokenUsage",
+    "create_token_manager",
+    "estimate_tokens",
+    "estimate_message_tokens",
+    "estimate_history_tokens",
+    "estimate_api_tokens",
+    "check_and_prompt_clear",
+    "token_manager",
+    "MODEL_CONTEXT_LIMITS",
+    "WARNING_THRESHOLD",
+    "CRITICAL_THRESHOLD",
+    "DANGER_THRESHOLD",
 ]
