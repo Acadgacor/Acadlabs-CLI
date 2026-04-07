@@ -1,30 +1,71 @@
 #!/bin/bash
-set -e # Berhenti kalau ada error
+set -e
 
-echo -e "\033[1;36m\U0001F680 Installing AcadLabs CLI...\033[0m"
+# Colors & Styles
+CYAN='\033[1;36m'
+GREEN='\033[1;32m'
+YELLOW='\033[1;33m'
+RED='\033[1;31m'
+BOLD='\033[1m'
+RESET='\033[0m'
 
-# 1. Cek Python
+# Header
+clear
+echo -e "${CYAN}"
+echo "  ===================================================="
+echo "      ___   _   _         _ _    ___ _      _ _ ___    "
+echo "     /   | / \ | |_ ___  | | |  / __| | ___| | __|    "
+echo "    / /| |/ _ \| __/ _ \ | | | | |   | |/ _ \ |__ \    "
+echo "   / /_| / ___ \||  __/  |_| | | |___| |  __/ |__) |   "
+echo "   \____/_/   \_\__\___| (_)_|  \____|_|\___|_____/    "
+echo "                                                      "
+echo "       Command Line Interface Installer               "
+echo "  ====================================================${RESET}"
+echo ""
+
+# Step 1: Check Python
+echo -e "${BOLD}[1/3] Checking Python...${RESET}"
 if ! command -v python3 &> /dev/null; then
-    echo -e "\033[1;31m\U0000274C Error: python3 tidak ditemukan.\033[0m"
+    echo -e "${RED}   ERROR: python3 tidak ditemukan.${RESET}"
+    echo -e "   Silakan install Python 3.8+ dari https://www.python.org/downloads/"
     exit 1
 fi
+PYTHON_VERSION=$(python3 --version 2>&1 | cut -d' ' -f2)
+echo -e "   ${GREEN}Found: Python $PYTHON_VERSION${RESET}"
+echo ""
 
-# 2. Cek Pip (Ini yang tadi lu kurang)
-if ! python3 -m pip --version &> /dev/null; then
-    echo -e "\033[1;33m\U0001F4E6 Pip tidak ditemukan. Mencoba install pip...\033[0m"
-    sudo apt update && sudo apt install python3-pip -y || { echo -e "\033[1;31m\U0000274C Gagal install pip. Silakan install manual: sudo apt install python3-pip\033[0m"; exit 1; }
+# Step 2: Choose Installation Method
+echo -e "${BOLD}[2/3] Installing AcadLabs CLI...${RESET}"
+if command -v pipx &> /dev/null; then
+    echo -e "   Using ${CYAN}pipx${RESET} (isolated environment)"
+    echo ""
+    pipx install git+https://github.com/Acadgacor/acadlabs-cli.git --force
+else
+    echo -e "   Using ${CYAN}pip${RESET} with --break-system-packages"
+    echo ""
+    python3 -m pip install git+https://github.com/Acadgacor/acadlabs-cli.git --break-system-packages --force-reinstall
 fi
+echo ""
 
-# 3. Proses Install
-echo "\U0001F4E6 Downloading and installing from GitHub..."
-# Pakai --user agar tidak butuh sudo dan masuk ke PATH user
-python3 -m pip install git+https://github.com/Acadgacor/acadlabs-cli.git --force-reinstall
-
-# 4. Cek PATH (Penting buat Linux/WSL)
-if ! command -v acadlabs &> /dev/null; then
-    echo -e "\033[1;33m\U000026A0  Peringatan: Perintah 'acadlabs' mungkin belum masuk ke PATH.\033[0m"
-    echo "Silakan jalankan: echo 'export PATH=\$PATH:\$HOME/.local/bin' >> ~/.bashrc && source ~/.bashrc"
+# Step 3: Verify Installation
+echo -e "${BOLD}[3/3] Verifying installation...${RESET}"
+if command -v acadlabs &> /dev/null; then
+    echo -e "   ${GREEN}Command 'acadlabs' is ready!${RESET}"
+else
+    echo -e "   ${YELLOW}Note: You may need to add ~/.local/bin to your PATH:${RESET}"
+    echo -e "   ${CYAN}export PATH=\"\$PATH:\$HOME/.local/bin\"${RESET}"
+    echo -e "   Add to ~/.bashrc for permanent access"
 fi
+echo ""
 
-echo -e "\033[1;32m\U00002705 Installation complete!\033[0m"
-echo -e "Coba jalankan: \033[1macadlabs login\033[0m"
+# Success Banner
+echo -e "${GREEN}"
+echo "  =========================================="
+echo "        Installation Complete!"
+echo "  ==========================================${RESET}"
+echo ""
+echo -e "  Start with: ${BOLD}${CYAN}acadlabs login${RESET}"
+echo -e "  Get help:   ${BOLD}${CYAN}acadlabs --help${RESET}"
+echo ""
+echo -e "  Web UI: ${CYAN}https://acadlabs.fun${RESET}"
+echo ""
